@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEGO RUSH - 3D Arcade Runner</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,400;0,700;0,900;1,800&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Three.js r125 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r125/three.min.js"></script>
+</head>
+<body class="bg-[#0f1225] text-white overflow-hidden select-none">
+
+  <!-- 3D WebGL Canvas Layer -->
+  <div id="game-canvas-container" class="fixed inset-0 w-full h-full z-0"></div>
+
+  <!-- Arcade HUD UI Overlay -->
+  <div class="fixed inset-0 pointer-events-none z-10 flex flex-col justify-between p-4 md:p-6">
+    
+    <!-- Top Header Telemetry Bar -->
+    <header class="flex items-center justify-between gap-4 w-full max-w-7xl mx-auto pointer-events-auto">
+      
+      <!-- Brand & Mode -->
+      <div class="flex items-center gap-3">
+        <div class="hud-panel flex items-center gap-2.5 px-4 py-2">
+          <div class="w-8 h-8 rounded-lg bg-[#ffe600] flex items-center justify-center font-black text-[#0f1225] text-lg italic shadow-lg shadow-[#ffe600]/30">LEGO RUSH</div>
+          <div>
+            <div class="text-xs font-bold tracking-widest text-slate-400 uppercase leading-none">BOLT EDITION</div>
+            <div class="text-lg font-black tracking-tight text-white leading-none mt-0.5">LEGO RUSH</div>
+          </div>
+        </div>
+
+        <div class="hud-pill hidden md:flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold text-[#ffe600]">
+          <span class="w-2 h-2 rounded-full bg-[#ffe600] animate-ping"></span>
+          TOKYO SPEEDWAY RUN
+        </div>
+      </div>
+
+      <!-- Live Run Counters -->
+      <div class="flex items-center gap-3">
+        <!-- Multiplier -->
+        <div class="hud-pill flex items-center gap-2 px-3.5 py-2">
+          <span class="text-xs text-slate-400 font-bold uppercase">MULT</span>
+          <span id="hud-mult" class="text-base font-black text-[#ffe600] italic">x1</span>
+        </div>
+
+        <!-- Coin Bank -->
+        <div class="hud-pill flex items-center gap-2 px-3.5 py-2">
+          <span class="text-base">🪙</span>
+          <span id="hud-coins" class="text-base font-black text-amber-300 tabular-nums">0</span>
+        </div>
+
+        <!-- Keys Bank -->
+        <div class="hud-pill flex items-center gap-2 px-3.5 py-2">
+          <span class="text-base">🔑</span>
+          <span id="hud-keys" class="text-base font-black text-cyan-400 tabular-nums">0</span>
+        </div>
+
+        <!-- Pause / Settings Button -->
+        <button id="btn-pause" aria-label="Pause game" class="hud-button w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/80 hover:bg-slate-700 text-white font-bold transition-transform active:scale-95">
+          ⏸
+        </button>
+      </div>
+    </header>
+
+    <!-- Center HUD Status (Score & Boost Active) -->
+    <div class="w-full max-w-7xl mx-auto flex items-start justify-between">
+      
+      <!-- Word Hunt & Combo Status -->
+      <div class="flex flex-col gap-3 pointer-events-auto">
+        <!-- Big Distance / Score -->
+        <div class="hud-panel p-4 flex flex-col gap-1 min-w-[200px]">
+          <span class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Run Distance</span>
+          <div class="flex items-baseline gap-2">
+            <span id="hud-distance" class="text-3xl md:text-4xl font-black text-white tracking-tight tabular-nums">0</span>
+            <span class="text-sm font-bold text-[#ffe600]">m</span>
+          </div>
+          <div class="text-xs font-semibold text-slate-400 flex items-center gap-1 mt-1">
+            <span class="">Score:</span>
+            <span id="hud-score" class="text-cyan-300 font-bold tabular-nums">0</span>
+          </div>
+        </div>
+
+        <!-- Word Hunt (S-U-R-F) -->
+        <div class="hud-panel px-4 py-2.5 flex items-center gap-2">
+          <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider mr-1">HUNT</span>
+          <div class="flex gap-1.5">
+            <span class="w-7 h-7 rounded-lg bg-[#ffe600] text-[#0f1225] font-black flex items-center justify-center text-sm shadow">S</span>
+            <span class="w-7 h-7 rounded-lg bg-[#ffe600] text-[#0f1225] font-black flex items-center justify-center text-sm shadow">U</span>
+            <span class="w-7 h-7 rounded-lg bg-[#ffe600] text-[#0f1225] font-black flex items-center justify-center text-sm shadow">R</span>
+            <span class="w-7 h-7 rounded-lg bg-slate-800/90 text-slate-500 font-black flex items-center justify-center text-sm border border-slate-700">F</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Boosters Tray -->
+      <div class="hud-panel p-3 flex flex-col gap-2.5 pointer-events-auto min-w-[170px]">
+        <div class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">ACTIVE BOOSTS</div>
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs font-bold border border-cyan-500/40">🛹</div>
+          <div class="flex-1">
+            <div class="text-xs font-bold text-white flex justify-between">
+              <span class="">Hoverboard</span>
+              <span id="hud-hoverboard-status" class="text-slate-400 text-[10px]">OFF</span>
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1">Jump while a train approaches to glide on its roof</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold border border-amber-500/40">🧲</div>
+          <div class="flex-1">
+            <div class="text-xs font-bold text-white flex justify-between">
+              <span class="">Coin Magnet</span>
+              <span id="hud-magnet-status" class="text-amber-400 text-[10px]">OFF</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-1 overflow-hidden">
+              <div id="hud-magnet-meter" class="bg-amber-400 h-full rounded-full w-0 transition-[width]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Deck: Controls & Jake Profile -->
+    <footer class="w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 pointer-events-auto">
+      
+      <!-- Character Card (Jake with Royal Blue Sideways Cap) -->
+      <div class="hud-panel px-4 py-2.5 flex items-center gap-3">
+        <div class="relative w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-700 to-sky-400 flex items-center justify-center border-2 border-blue-400 shadow-md">
+          <!-- Royal Blue Sideways Cap Emoji/Icon -->
+          <span class="text-2xl" title="Jake (Sideways Blue Cap)">🧢</span>
+          <span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#0f1225]"></span>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-sm font-black text-white tracking-wide uppercase">JAKE</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/30 text-blue-300 border border-blue-400/30">BLUE CAP</span>
+          </div>
+          <div class="text-xs text-slate-400 font-medium">Default Street Runner Crew</div>
+        </div>
+      </div>
+
+      <!-- On-Screen Controls for Touch / Keyboard Reference -->
+      <div class="flex items-center gap-2">
+        <button id="btn-left" class="hud-key-btn flex flex-col items-center justify-center w-14 h-12 rounded-xl bg-slate-800/90 text-white border border-slate-700 hover:bg-slate-700 active:scale-95 transition">
+          <span class="text-base leading-none">◀</span>
+          <span class="text-[9px] font-bold text-slate-400">A / LEFT</span>
+        </button>
+        <div class="flex flex-col gap-2">
+          <button id="btn-jump" class="hud-key-btn flex flex-col items-center justify-center w-14 h-12 rounded-xl bg-slate-800/90 text-white border border-slate-700 hover:bg-slate-700 active:scale-95 transition">
+            <span class="text-base leading-none">▲</span>
+            <span class="text-[9px] font-bold text-slate-400">W / JUMP</span>
+          </button>
+        </div>
+        <button id="btn-hoverboard" type="button" aria-pressed="false" class="hud-key-btn flex flex-col items-center justify-center h-12 px-3 rounded-xl bg-slate-800/90 text-white border border-cyan-500/50 hover:bg-slate-700 active:scale-95 transition">
+          <span class="text-base leading-none">🛹</span>
+          <span data-hoverboard-label class="text-[9px] font-bold text-cyan-300">HOVERBOARD OFF</span>
+        </button>
+        <button id="btn-coin-magnet" type="button" aria-label="Activate coin magnet" aria-pressed="false" class="hud-key-btn flex flex-col items-center justify-center h-12 px-3 rounded-xl bg-slate-800/90 text-white border border-red-500/50 hover:bg-slate-700 active:scale-95 transition">
+          <span class="text-base leading-none">🧲</span>
+          <span class="text-[9px] font-bold text-red-300">MAGNET · M</span>
+        </button>
+        <button id="btn-right" class="hud-key-btn flex flex-col items-center justify-center w-14 h-12 rounded-xl bg-slate-800/90 text-white border border-slate-700 hover:bg-slate-700 active:scale-95 transition">
+          <span class="text-base leading-none">▶</span>
+          <span class="text-[9px] font-bold text-slate-400">D / RIGHT</span>
+        </button>
+      </div>
+
+      <!-- Quick Tips -->
+      <div class="hidden lg:flex items-center gap-4 text-xs font-semibold text-slate-400">
+        <span class=""><kbd class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white">A</kbd> <kbd class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white">D</kbd> Steer</span>
+        <span class=""><kbd class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white">Space</kbd> Jump · hoverboard on to glide</span>
+        <span class="text-emerald-400 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span> 60 FPS WebGL
+        </span>
+      </div>
+    </footer>
+
+  </div>
+
+  <div id="run-overlay" class="run-overlay"><div class="run-card"><div class="run-kicker">LEGO RUSH · ARCADE RUN</div><h1 id="overlay-title">Ready to run?</h1><p id="overlay-copy">Select HOVERBOARD, then jump while a train approaches to glide across its roof. Without it, jumping into a train ends your run.</p><button id="btn-start" class="run-start">START RUN</button><p class="run-hint">Move: A / D or ← / → · Jump: W / Space / ↑ · Select HOVERBOARD before a train arrives · Pause: P</p></div></div>
+  <!-- Game Logic Script -->
+  <script src="game.js"></script>
+
+
+
+
+</body></html>

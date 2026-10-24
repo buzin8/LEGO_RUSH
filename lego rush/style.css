@@ -1,0 +1,87 @@
+/* Subway Surfers 3D Arcade - Glassmorphism & UI Style */
+:root {
+  --primary-color: #ffe600;
+  --bg-dark: #0f1225;
+  --panel-bg: rgba(15, 23, 42, 0.78);
+  --panel-border: rgba(148, 163, 184, 0.16);
+  --font-display: 'Anybody', sans-serif;
+  --font-mono: 'Space Grotesk', monospace;
+}
+
+body {
+  font-family: var(--font-display);
+  background-color: var(--bg-dark);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+/* Glassmorphism Panel */
+.hud-panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* HUD Pill Badges */
+.hud-pill {
+  background: rgba(30, 41, 59, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 9999px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Control Buttons */
+.hud-key-btn {
+  box-shadow: 0 6px 0 #0f172a, 0 10px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.hud-key-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #0f172a, 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Number display smoothing */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+/* Three.js Canvas Container */
+#game-canvas-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  outline: none;
+}
+
+.run-overlay{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:1rem;background:rgba(4,8,20,.18);backdrop-filter:blur(8px);transition:opacity .2s ease}
+.run-overlay.hidden{display:none}
+.run-card{width:min(100%,32rem);padding:2rem;border:1px solid rgba(255,255,255,.18);border-radius:1.5rem;background:rgba(15,23,42,.94);box-shadow:0 24px 80px #0009;text-align:center;color:#fff}
+.run-kicker{font-size:.75rem;font-weight:900;letter-spacing:.2em;color:#ffe600}
+.run-card h1{margin:.7rem 0;font-size:clamp(2rem,7vw,3.5rem);font-weight:900;line-height:1}
+.run-card p{color:#cbd5e1}
+.run-start{margin:1rem 0;padding:.85rem 2rem;border:0;border-radius:.8rem;background:#ffe600;color:#111827;font-weight:900;letter-spacing:.08em;cursor:pointer;box-shadow:0 5px 0 #b99f00}
+.run-start:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.run-card .run-hint{font-size:.75rem;line-height:1.6}
+
+/* Critical layout also works when the optional Tailwind CDN is unavailable. */
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#38bdf8;color:#fff}
+#game-canvas-container{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.run-overlay{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:1rem;background:rgba(4,8,20,.18);backdrop-filter:blur(8px)}
+.run-overlay.hidden{display:none}
+.run-card{box-sizing:border-box;width:min(100%,32rem);padding:2rem;border:1px solid rgba(255,255,255,.18);border-radius:1.5rem;background:rgba(15,23,42,.96);box-shadow:0 24px 80px #0009;text-align:center;color:#fff;font-family:Arial,sans-serif}
+.run-card h1{margin:.7rem 0;font-size:clamp(2rem,7vw,3.5rem);font-weight:900;line-height:1}
+.run-card p{color:#cbd5e1}
+.run-kicker{font-size:.75rem;font-weight:900;letter-spacing:.2em;color:#ffe600}
+.run-start{margin:1rem 0;padding:.85rem 2rem;border:0;border-radius:.8rem;background:#ffe600;color:#111827;font-weight:900;letter-spacing:.08em;cursor:pointer}
+
+/* Keep the supplied castle image visible behind the transparent 3D playfield. */
+#game-canvas-container{background:radial-gradient(ellipse at 78% 16%,rgba(255,220,150,.32),transparent 25%),linear-gradient(180deg,rgba(56,189,248,.12),rgba(15,23,42,.2)),url("./japanese-castle-background.png") center center / cover no-repeat}
+#game-canvas-container canvas{background:transparent!important}
